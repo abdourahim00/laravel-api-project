@@ -249,35 +249,47 @@ class UserController extends Controller
         }
     }
 
-    public function confirmOTP(Request $request)
+    public function regenerateOTP(Request $request)
     {
-        try {
-            $request->validate([
-                'otp' => 'required',
-            ]);
-
-            $user = User::where('otp', $request->otp)
-                ->where('otp_expired_at', '>', now())
-                ->first();
-
-            if ($user) {
-                $newOTP = rand(100000, 999999);
-                $user->update(['otp' => $newOTP]);
-
-                Mail::send('email.updateOTP', ['otp' => $newOTP], function ($message) use ($user) {
-                    $message->to($user->email)
-                            ->subject('OTP Expired and Updated');
-                });
-
-                return response()->success('OTP is expired and updated');
-
-            } else {
-                return response()->error('OTP is invalid or expired');
-            }
-
-        } catch (\Exception $e) {
-            return response()->error('Failed to confirm OTP', ['error' => $e->getMessage()]);
-        }
+        $user = User::where('email', $request->email)->first();
+        $otp = rand(100000, 999999);
+        $user->update(['otp' => $otp]);
+        Mail::send('email.otp', ['otp' => $otp], function ($message) use ($request) {
+            $message->to($request->email)
+                    ->subject('OTP');
+        });
+        return response()->success('OTP regenerated successfully');
     }
 
+    // public function confirmOTP(Request $request)
+    //     {
+    //         // Validate the incoming OTP
+    //         $request->validate([
+    //             'otp' => 'required',
+    //         ]);
+
+    //         // Check if the OTP exists and is not expired
+    //         $user = User::where('otp', $request->otp)
+    //         ->where('otp_expired_at', '>', now())
+    //         ->first();
+
+
+    //         if ($user) {
+    //             // Generate a new OTP
+    //             $newOTP = rand(100000, 999999);
+
+    //             // Update user with the new OTP
+    //             $user->update(['otp' => $newOTP]);
+
+    //             // Send email notification about the updated OTP
+    //             Mail::send('email.updateOTP', ['otp' => $newOTP], function ($message) use ($user) {
+    //                 $message->to($user->email)
+    //                         ->subject('OTP Expired and Updated');
+    //             });
+
+    //             return response()->json(['status' => 1, 'message' => 'OTP is expired and updated'], 200);
+    //         } else {
+    //             return response()->json(['status' => 2, 'message' => 'OTP is valid'], 404);
+    //         }
+    //     }
 }

@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Support\ServiceProvider;
 
 return [
 
@@ -123,7 +124,10 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'providers' => [
-        App\Providers\ResponseServiceProvider::class,
-    ],
+    'providers' => ServiceProvider::defaultProviders()->merge([
+        /*
+         * Package Service Providers...
+         */
+	App\Providers\ResponseServiceProvider::class,
+    ])->toArray(),
 ];

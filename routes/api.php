@@ -14,4 +14,5 @@ Route::post('/register', [UserController::class, 'register']);
 
 Route::post('/login', [UserController::class, 'login']);
 
-Route::post('/confirmOTP', [UserController::class, 'confirmOTP']);
+// Route::post('/confirmOTP', [UserController::class, 'confirmOTP']);
+Route::post('/regenerateOTP', [UserController::class, 'regenerateOTP']);
