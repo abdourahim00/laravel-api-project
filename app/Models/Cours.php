@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Category;
 
 class Cours extends Model
 {
@@ -14,6 +15,14 @@ class Cours extends Model
         'description',
         'image',
         'duration',
-        'price'
+        'price',
+        'category_id',
+        'video',
+        'featured'
     ];
+
+    public function category()
+{
+    return $this->belongsTo(Category::class);
+}
 }

@@ -195,7 +195,7 @@ class UserController extends Controller
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required|string|min:6',
                 'phone_number' => 'required|string',
-                'role_id' => 'required',
+                'role_id' => 'required|exists:roles,id',
             ]);
 
             $user = User::create([
@@ -321,41 +321,35 @@ class UserController extends Controller
     public function logout()
     {
         Auth::logout();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Successfully logged out',
-        ]);
+        // return response()->json([
+        //     'status' => 'success',
+        //     'message' => 'Successfully logged out',
+        // ]);
+
+        return response()->success('Successfully logged out');
     }
     public function updateUser(Request $request, $id){
 
-        $user = User::find($id);
+        $user = User::findOrFail($id);
         $user->update($request->all());
 
         if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not found',
-            ], 404);
+            return response()->error('User not found', 404);
         }
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User updated successfully',
-            'user' => $user
-        ]);
+        // return response()->json([
+        //     'status' => 'success',
+        //     'message' => 'User updated successfully',
+        //     'user' => $user
+        // ]);
+        return response()->success('User updated successfully', ['user' => $user]);
     }
 
     public function deleteUser($id){
-        $user = User::find($id);
+        $user = User::findOrFail($id);
         if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not found',
-            ], 404);
+            return response()->error('User not found', 404);
         }
         $user->delete();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User deleted successfully',
-        ]);
+        return response()->success('User deleted successfully');
     }
 }

@@ -4,19 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CoursController;
-
-
-// Route::post('/register', [UserController::class, 'register']);
-
-
-// Route::post('/login', [UserController::class, 'login']);
-// // Route::post('/login', [UserController::class, 'login']);
-
-// // Route::post('/confirmOTP', [UserController::class, 'confirmOTP']);
-// Route::post('/regenerateOTP', [UserController::class, 'regenerateOTP']);
-
-// Route::post('/verifyOTP', [UserController::class, 'verifyOTP']);
-
+use App\Http\Controllers\CategoryController;
 
 Route::controller(UserController::class)->group(function () {
     Route::post('/register', 'register');
@@ -25,18 +13,36 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/verifyOTP', 'verifyOTP');
 });
 
-Route::middleware('auth:api')->controller(UserController::class)->group(function () {
-    Route::post('/logout', 'logout');
-    Route::post('/deleteUser/{id}', 'deleteUser');
-    Route::post('/updateUser/{id}', 'updateUser');
 
+Route::controller(CoursController::class)->group(function () {
+    Route::post('/cours', 'create');
+    Route::delete('/deleteCours/{id}', 'deleteCours');
+    Route::get('/getCours', 'getCours');
+    Route::post('/updateCours/{id}', 'updateCours');
+    Route::get('/getDetailCours/{id}', 'getDetailCours');
+    Route::get('/getCoursByCategory/{id}', 'getCoursByCategory');
 });
 
-Route::middleware('auth:api')->controller(CoursController::class)->group(function () {
-    Route::post('/cours', 'create');
-    Route::post('/buyCours/{id}', 'buyCours');
-    Route::post('/deleteCours/{id}', 'deleteCours');
-    Route::post('/updateCours/{id}', 'updateCours');
+
+Route::middleware('auth:api')->controller(UserController::class)->group(function () {
+    Route::post('/logout', 'logout');
+    Route::delete('/deleteUser/{id}', 'deleteUser');
+    Route::patch('/updateUser/{id}', 'updateUser');
+});
+
+// Route::middleware('auth:api')->controller(CoursController::class)->group(function () {
+//     Route::post('/cours', 'create');
+//     Route::post('/buyCours/{id}', 'buyCours');
+//     Route::delete('/deleteCours/{id}', 'deleteCours');
+//     Route::post('/updateCours/{id}', 'updateCours');
+// });
+
+Route::controller(CategoryController::class)->group(function () {
+    Route::post('/createCategory', 'create');
+    Route::post('/updateCategory/{id}', 'update');
+    Route::delete('/deleteCategory/{id}', 'delete');
+    Route::get('/category', 'index');
+    Route::get('/getCountCoursOfCategory/{id}', 'getCountCoursOfCategory');
 });
 
 

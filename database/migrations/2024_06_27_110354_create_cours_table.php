@@ -18,6 +18,10 @@ return new class extends Migration
             $table->integer('price');
             $table->string('duration')->nullable();
             $table->string('image')->nullable();
+            $table->unsignedBigInteger('category_id');
+            $table->foreign('category_id')->references('id')->on('categories');
+            $table->string('video');
+            $table->boolean('featured')->default(false);
             $table->timestamps();
         });
     }
