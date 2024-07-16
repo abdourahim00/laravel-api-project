@@ -17,7 +17,7 @@ class ResponseServiceProvider extends ServiceProvider
     {
         $factory->macro('success', function ($message = '', $data = null) use ($factory) {
             $format = [
-                'status' => 'ok',
+                'status' => 200,
                 'message' => $message,
                 'data' => $data,
             ];
@@ -27,7 +27,7 @@ class ResponseServiceProvider extends ServiceProvider
 
         $factory->macro('error', function (string $message = '', $errors = []) use ($factory) {
             $format = [
-                'status' => 'error',
+                'status' => 404,
                 'message' => $message,
                 'errors' => $errors,
             ];

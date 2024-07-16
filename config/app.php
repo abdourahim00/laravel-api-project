@@ -125,9 +125,19 @@ return [
     ],
 
     'providers' => ServiceProvider::defaultProviders()->merge([
+        ProtoneMedia\LaravelFFMpeg\Support\ServiceProvider::class,
         /*
          * Package Service Providers...
          */
 	App\Providers\ResponseServiceProvider::class,
     ])->toArray(),
+
+    'aliases' => [
+        'FFMpeg' => ProtoneMedia\LaravelFFMpeg\Support\FFMpeg::class
+    ],
+
+    'ffmpeg' => [
+        'ffmpeg.binaries'  => env('FFMPEG_BINARIES', 'ffmpeg'),
+        'ffprobe.binaries' => env('FFPROBE_BINARIES', 'ffprobe'),
+    ],
 ];

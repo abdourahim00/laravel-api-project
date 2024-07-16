@@ -16,12 +16,15 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->integer('price');
-            $table->string('duration')->nullable();
+            // $table->string('duration')->nullable();
+            // $table->string('lesson');
             $table->string('image')->nullable();
             $table->unsignedBigInteger('category_id');
             $table->foreign('category_id')->references('id')->on('categories');
-            $table->string('video');
-            $table->boolean('featured')->default(false);
+            // $table->string('video');
+            // $table->boolean('featured')->default(false);
+            $table->enum('featured', ['true', 'false'])->default('false');
+            $table->string('slug')->unique();
             $table->timestamps();
         });
     }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Cours;
+use Illuminate\Support\Str;
+
 
 class CoursController extends Controller
 {
@@ -12,11 +14,11 @@ class CoursController extends Controller
             'title' => 'required|string',
             'description' => 'required',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'duration' => 'required|string',
+            // 'duration' => 'required|string',
             'price' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
-            'video' => 'required|max:50000|url',
-            'featured' => 'nullable|boolean',
+            // 'video' => 'required|file|mimetypes:video/mp4',
+            'featured' => 'in:true,false',
         ]);
         $filename = $request->file('image')->getClientOriginalName();
         // $fileVideo = $request->file('video')->getClientOriginalName();
@@ -25,11 +27,12 @@ class CoursController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'price' => $request->price,
-            'duration' => $request->duration,
-            'image'=>$request->file('image')->storeAS('cours_images', $filename),
+            // 'duration' => $request->duration,
+            'image'=>$request->file('image')->storeAs('images', $filename, 'public'),
             'category_id' => $request->category_id,
-            'video' => $request->video,
-            'featured' => $request->featured
+            // 'video' => $request->video,
+            'featured' => $request->featured,
+            'slug' => Str::slug($request->title, '-'),
         ]);
 
         return response()->success('Cours created successfully', ['cours' => $cours]);
@@ -70,55 +73,92 @@ class CoursController extends Controller
         }
     }
 
-
-    public function updateCours($id, Request $request) {
-        $cours = Cours::findOrFail($id);
+    public function updateCours($slug, Request $request) {
+        $cours = Cours::where('slug', $slug)->first();
 
         $validatedData = $request->validate([
             'title' => 'nullable|string',
             'description' => 'nullable',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'duration' => 'nullable|string',
+            // 'duration' => 'nullable|string',
             'price' => 'nullable|numeric',
             'category_id' => 'nullable|exists:categories,id',
-            'video' => 'nullable|max:50000|url',
-            'featured' => 'nullable|boolean',
+            // 'video' => 'required|file|mimetypes:video/mp4',
+            'featured' => 'in:true,false',
         ]);
 
         $cours->fill($validatedData);
-
         if ($request->hasFile('image')) {
             $filename = $request->file('image')->getClientOriginalName();
-            $cours->image = $request->file('image')->storeAs('cours_images', $filename);
+            $cours->image = $request->file('image')->storeAs('images', $filename, 'public');
         }
+        // if($request->hasFile('video')){
+        //     $filename = $request->file('video')->getClientOriginalName();
+        //     $cours->video = $request->file('video')->storeAs('cours_video', $filename);
+        // }
         // Save the updated course
         $cours->save();
-
-        return response()->success('Cours updated successfully', ['cours' => $cours]);
+        $list = Cours::with('category')->get();
+        return response()->success('Cours updated successfully', ['cours' => $list]);
     }
 
 
-    public function getCoursByCategory($id) {
-        $cours = Cours::where('category_id', $id)->get();
-        return response()->success('Liste des cours par catégorie', ['cours' => $cours]);
-    }
+    // public function getCoursByCategory($id) {
+    //     $cours = Cours::where('category_id', $id)->get();
+    //     return response()->success('Liste des cours par catégorie', ['cours' => $cours]);
+    // }
 
-    public function getCours() {
+    // public function getCours($feat) {
+    //     $cours = Cours::where('featured', $feat)->first();
+    //     return response()->success('Liste des cours', ['cours' => $cours]);
+    // }
+
+    public function index(Request $request){
+
+        $featured = $request->query('featured');
+        // dd($featured);
+
+        if($featured != null){
+            if($featured === 'false' || $featured === 'true'){
+                $cours = Cours::where('featured', $featured)->get();
+                $list = Cours::with('category')->get();
+                return response()->success('Liste des cours en vedette', ['cours' => $list]);
+            }
+            else{
+                return response()->error('Featured does not exist');
+            }
+        }
         $cours = Cours::all();
-        return response()->success('Liste des cours', ['cours' => $cours]);
+        $list = Cours::with('category')->get();
+        return response()->success('Liste de tous les cours ', ['cours' => $list]);
+        // $cours = Cours::with('category')->get();
+
     }
 
-    public function getDetailsCours($id) {
-        $cours = Cours::findOrFail($id);
+    // public function getDetailsCours($id) {
+    //     $cours = Cours::findOrFail($id);
+    //     return response()->success('Détails du cours', ['cours' => $cours]);
+    // }
+
+    public function deleteCours($slug) {
+        $cours = Cours::where('slug', $slug)->first();
+        if (!$cours) {
+            return response()->error('Cours not found');
+        }
+        $cours->delete();
+
+        return response()->success('Cours deleted successfully', ['cours' => $cours]);
+    }
+
+
+    public function coursesRecommended($id) {
+        $cours = Cours::where('category_id', $id)->get();
+        return response()->success('Liste des cours recommandes', ['cours' => $cours]);
+    }
+
+    public function getDetails($slug) {
+        $cours = Cours::where('slug', $slug)->first();
         return response()->success('Détails du cours', ['cours' => $cours]);
     }
 
-    public function deleteCours($id) {
-        $cours = Cours::findOrFail($id);
-        if ($cours) {
-            $cours->delete();
-            return response()->success('Cours deleted successfully');
-        }
-        return response()->error('Cours not found');
-    }
 }

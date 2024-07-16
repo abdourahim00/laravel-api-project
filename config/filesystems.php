@@ -56,6 +56,12 @@ return [
             'throw' => false,
         ],
 
+        'my-path' => [
+            'driver' => 'local',
+            'root' => storage_path('C:/Users/lenovo/desktop/cours_images'),
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*

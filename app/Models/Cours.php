@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
+use App\Models\Video;
 
 class Cours extends Model
 {
@@ -14,15 +15,27 @@ class Cours extends Model
         'title',
         'description',
         'image',
-        'duration',
+        // 'duration',
         'price',
         'category_id',
-        'video',
-        'featured'
+        // 'video',
+        'featured',
+        'slug'
     ];
 
-    public function category()
-{
-    return $this->belongsTo(Category::class);
-}
+    public function getImageAttribute(){
+        return getenv('APP_URL')."/storage/".$this->attributes['image'];
+    }
+
+    public function category(){
+        return $this->belongsTo(Category::class);
+    }
+
+    public function video(){
+        return $this->hasMany(Video::class);
+    }
+
+    public function leçons(){
+        return $this->hasMany(Leçon::class);
+    }
 }
