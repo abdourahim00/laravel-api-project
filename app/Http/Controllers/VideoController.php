@@ -22,15 +22,13 @@ class VideoController extends Controller
     $name = pathinfo($filename, PATHINFO_FILENAME);
     $path = $request->video_file->storeAs('cours_video', $filename, 'public');
 
-    // Récupérer la durée de la vidéo
-    // $ffmpeg = FFMpeg::create();
     $ffmpeg = FFMpeg\FFMpeg::create([
         'ffmpeg.binaries'  => env('FFMPEG_BINARIES', 'ffmpeg'),
         'ffprobe.binaries' => env('FFPROBE_BINARIES', 'ffprobe'),
-        'timeout'          => 3600, // the timeout for the underlying process
-        'ffmpeg.threads'   => 1,   // the number of threads that FFMpeg should use
+        'timeout'          => 3600,
+        'ffmpeg.threads'   => 1,
     ]);
-    $video = $ffmpeg->open(storage_path('app/' . $path));
+    $video = $ffmpeg->open(storage_path($path, 'public'));
     $duration = $video->getFormat()->get('duration');
 
     $video = Video::create([
@@ -103,6 +101,11 @@ class VideoController extends Controller
         $video->delete();
         $list = Video::with('cours')->get();
         return response()->success('Video deleted successfully', ['video' => $list]);
+    }
+
+    public function getVideoByCours($coursID){
+        $video = Video::where('cours_id', $coursID)->get();
+        return response()->success('Liste des videos avec les cours correspondants', ['video' => $video]);
     }
 
 }

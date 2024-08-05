@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Cours;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 
 class CoursController extends Controller
@@ -157,8 +158,41 @@ class CoursController extends Controller
     }
 
     public function getDetails($slug) {
-        $cours = Cours::where('slug', $slug)->first();
-        return response()->success('Détails du cours', ['cours' => $cours]);
+        
+    }
+
+    public function getCoursesBoughtByUser($userId){
+        $courses = DB::table('cours')
+        ->join('order_items', 'cours.id', '=', 'order_items.cours_id')
+        ->join('orders', 'order_items.order_id', '=', 'orders.id')
+        ->join('payments', 'orders.id', '=', 'payments.order_id')
+        ->where('orders.user_id', $userId)
+        ->where('orders.status', 'completed')
+        ->where('payments.payment_status', 'paid')
+        ->select('cours.*')
+        ->distinct()
+        ->get();
+
+        // $is_bought = true;
+
+        return response()->success('Liste des cours achetes', ['courses' => $courses]);
+    }
+
+    public function getTransactions($userId)
+    {
+        $transactions = DB::table('payments')
+            ->join('orders', 'payments.order_id', '=', 'orders.id')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('cours', 'order_items.cours_id', '=', 'cours.id')
+            ->where('orders.user_id', $userId)
+            ->where('payments.payment_status', 'paid')
+            ->select('payments.id as payment_id', 'payments.amount', 'payments.payment_method',
+                     'payments.created_at as payment_date', 'orders.id as order_id',
+                     'orders.total_price as order_total', 'cours.title as course_title')
+            ->orderBy('payments.created_at', 'desc')
+            ->get();
+
+        return response()->success('Liste des transactions', ['is_bought' => $is_bought, 'transactions' => $transactions]);
     }
 
 }

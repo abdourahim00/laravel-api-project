@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Sms;
-use Mail;
-use Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 use GlobalHelpers;
 
 
@@ -186,7 +186,11 @@ class UserController extends Controller
     //         }
     //     }
 
-
+        public function getUser(){
+            $user = Auth::user();
+            $token = Auth::login($user);
+            return response()->success('User retrieved successfully', ['user' => $user, 'token' => $token]);
+        }
         public function register(Request $request)
     {
         try {
@@ -195,7 +199,7 @@ class UserController extends Controller
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required|string|min:6',
                 'phone_number' => 'required|string',
-                'role_id' => 'required|exists:roles,id',
+                // 'role_id' => 'required|exists:roles,id',
             ]);
 
             $user = User::create([
@@ -203,7 +207,7 @@ class UserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'phone_number' => $request->phone_number,
-                'role_id' => $request->role_id,
+                // 'role_id' => $request->role_id,
             ]);
 
             $otp = rand(100000, 999999);
@@ -320,8 +324,14 @@ class UserController extends Controller
 
     public function logout()
     {
-        Auth::logout();
-        // return response()->json([
+        $logout = Auth::logout();
+
+        if (!$logout) {
+            return response()->error('Logout failed');
+        }
+        return response()->success('Logout successful');
+
+            // return response()->json([
         //     'status' => 'success',
         //     'message' => 'Successfully logged out',
         // ]);
@@ -351,5 +361,13 @@ class UserController extends Controller
         }
         $user->delete();
         return response()->success('User deleted successfully');
+    }
+
+    public function getUserDetails($id){
+        $user = User::findOrFail($id);
+        if (!$user) {
+            return response()->error('User not found', 404);
+        }
+        return response()->success('User details', ['user' => $user]);
     }
 }

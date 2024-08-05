@@ -11,17 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('videos', function (Blueprint $table) {
+        Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('video_file');
-            $table->string("duration");
-            $table->string('slug')->unique();
+            $table->unsignedBigInteger('order_id');
+            $table->foreign('order_id')->references('id')->on('orders');
             $table->unsignedBigInteger('cours_id');
             $table->foreign('cours_id')->references('id')->on('cours');
-            $table->unsignedBigInteger('leçons_id');
-            $table->foreign('leçons_id')->references('id')->on('leçons');
+            $table->integer('quantity')->default(1);
             $table->timestamps();
+
         });
     }
 
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('videos');
+        Schema::dropIfExists('order_items');
     }
 };
